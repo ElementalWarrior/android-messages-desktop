@@ -21,6 +21,7 @@ const {
 let mainWindow: BrowserWindow;
 let trayManager: TrayManager;
 
+
 const gotTheLock = app.requestSingleInstanceLock();
 
 if (!gotTheLock) {
@@ -62,6 +63,7 @@ if (gotTheLock) {
     const { width, height } = savedWindowSize.value;
     const { x, y } = savedWindowPosition.value ?? {};
 
+    console.log("app.getAppPath()", app.getAppPath())
     mainWindow = new BrowserWindow({
       width,
       height,
@@ -75,8 +77,8 @@ if (gotTheLock) {
         : undefined,
       titleBarStyle: IS_MAC ? "hiddenInset" : "default",
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false,
+        // nodeIntegration: false,
+        // contextIsolation: false,
         preload: IS_DEV
           ? path.resolve(app.getAppPath(), "bridge.js")
           : path.resolve(app.getAppPath(), "app", "bridge.js"),
@@ -102,7 +104,7 @@ if (gotTheLock) {
           requestHeaders: { ...requestHeaders, "User-Agent": userAgent },
         })
     );
-
+    // mainWindow.loadFile("../messages.html");
     mainWindow.loadURL("https://messages.google.com/web/");
 
     trayManager.startIfEnabled();
@@ -159,6 +161,28 @@ if (gotTheLock) {
       },
       (details, callback) => {
         callback({ cancel: true });
+      }
+    );
+    mainWindow.webContents.session.webRequest.onBeforeRequest(
+      {
+        urls: [
+          "file://www.google.com/js/bg*",
+        ],
+      },
+      (details, callback) => {
+        let path = details.url.replace("file://www.google.com/js/bg", "")
+        callback({ redirectURL: "https://www.google.com/js/bg" + path });
+      }
+    );
+    mainWindow.webContents.session.webRequest.onBeforeRequest(
+      {
+        urls: [
+          "file:///web/",
+        ],
+      },
+      (details, callback) => {
+        let path = details.url.replace("file:///web/", "")
+        callback({ redirectURL: "https://www.google.com/js/bg" + path });
       }
     );
   }); //onready

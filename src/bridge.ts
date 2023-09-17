@@ -13,7 +13,10 @@ import {
 } from "./helpers/observers";
 import { getProfileImg } from "./helpers/profileImage";
 
+// window.exports= {};
+
 window.addEventListener("load", () => {
+  window.exports = {};
   if (IS_MAC) {
     const titlebarStyle = `#amd-titlebar {
       -webkit-app-region: drag;
